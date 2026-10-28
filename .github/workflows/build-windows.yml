@@ -79,6 +79,16 @@ jobs:
           Write-Host "Standalone: $standalone ($((Get-Item $standalone).Length) bytes)"
           Write-Host "Installer: $installer ($((Get-Item $installer).Length) bytes)"
 
+
+      - name: Upload pluginval diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: YMYVerb-pluginval-diagnostics
+          path: dist/pluginval-logs/**
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:

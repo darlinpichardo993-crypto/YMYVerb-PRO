@@ -35,7 +35,7 @@ namespace ymy
     struct SimpleList : juce::ListBoxModel
     {
         std::function<int()> count; std::function<juce::String (int)> text; std::function<void (int)> select; std::function<bool (int)> starred;
-        int getNumRows() override { return count(); }
+        int getNumRows() override { return count ? count() : 0; }
         void paintListBoxItem (int row, juce::Graphics&, int w, int h, bool sel) override;
         void selectedRowsChanged (int row) override { if (row >= 0 && select) select (row); }
     };

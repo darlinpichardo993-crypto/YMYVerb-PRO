@@ -67,7 +67,7 @@ try {
     Write-Host "Visual Studio: $installationVersion ($generator)" -ForegroundColor Green
     New-Item -ItemType Directory -Force -Path $dist | Out-Null
 
-    Invoke-Checked "cmake" @("-S", $root, "-B", $build, "-G", $generator, "-A", "x64", "-DCMAKE_BUILD_TYPE=Release")
+    Invoke-Checked "cmake" @("-S", $root, "-B", $build, "-G", $generator, "-A", "x64")
     Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--target", "YMYVerb_VST3", "test_dsp", "--parallel", "2")
     Invoke-Checked "ctest" @("--test-dir", $build, "-C", "Release", "--output-on-failure")
 

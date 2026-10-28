@@ -42,9 +42,11 @@ jobs:
           if (-not $validator) { throw "Could not find pluginval.exe after extraction." }
           New-Item -ItemType Directory -Force -Path $validationLogs | Out-Null
           $plugin = Join-Path $env:GITHUB_WORKSPACE "dist\\YMYVerb.vst3"
-          & $validator.FullName --validate-in-process --strictness-level 5 --output-dir $validationLogs $plugin
-          if ($LASTEXITCODE -ne 0) {
-            throw "pluginval failed to load or validate YMYVerb. See pluginval logs in the job artifacts."
+          & $validator.FullName --validate $plugin --strictness-level 5 --output-dir $validationLogs
+          $validatorExitCode = $LASTEXITCODE
+          Write-Host "pluginval exit code: $validatorExitCode"
+          if ($validatorExitCode -ne 0) {
+            throw "pluginval exited with code $validatorExitCode. See pluginval logs in the job artifacts."
           }
 
       - name: Verify VST3, standalone app, and installer

@@ -42,11 +42,23 @@ jobs:
           if (-not $validator) { throw "Could not find pluginval.exe after extraction." }
           New-Item -ItemType Directory -Force -Path $validationLogs | Out-Null
           $plugin = Join-Path $env:GITHUB_WORKSPACE "dist\\YMYVerb.vst3"
-          & $validator.FullName --validate $plugin --strictness-level 5 --output-dir $validationLogs
-          $validatorExitCode = $LASTEXITCODE
-          Write-Host "pluginval exit code: $validatorExitCode"
+          $stdoutLog = Join-Path $validationLogs "pluginval-stdout.txt"
+          $stderrLog = Join-Path $validationLogs "pluginval-stderr.txt"
+          $validatorArgs = @(
+            "--validate",
+            ('"' + $plugin + '"'),
+            "--strictness-level",
+            "5",
+            "--output-dir",
+            ('"' + $validationLogs + '"')
+          )
+          $validatorProcess = Start-Process -FilePath $validator.FullName -ArgumentList $validatorArgs -Wait -PassThru -NoNewWindow -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
+          $validatorExitCode = $validatorProcess.ExitCode
+          Write-Host "pluginval process exit code: $validatorExitCode"
+          if (Test-Path $stdoutLog) { Get-Content $stdoutLog }
+          if (Test-Path $stderrLog) { Get-Content $stderrLog }
           if ($validatorExitCode -ne 0) {
-            throw "pluginval exited with code $validatorExitCode. See pluginval logs in the job artifacts."
+            throw "pluginval exited with code $validatorExitCode. See pluginval stdout, stderr, and report in the job artifacts."
           }
 
       - name: Verify VST3, standalone app, and installer

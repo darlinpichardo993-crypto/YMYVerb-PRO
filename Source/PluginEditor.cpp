@@ -297,10 +297,10 @@ void YmyEditor::paint (Graphics& g)
     g.setColour (gold2); g.setFont (Serif (R (0, 0, 0, 44).getHeight() * 0.92f)); g.drawText ("YMYVerb", R (50, 52, 330, 70), Justification::centredLeft);
     g.setColour (ink.withAlpha (0.75f)); g.setFont (F (R (0, 0, 0, 15).getHeight() * 0.9f)); g.drawText ("V O C A L   R E V E R B", R (54, 118, 330, 22), Justification::centredLeft);
     g.setColour (gold2); g.setFont (Serif (R (0, 0, 0, 30).getHeight() * 0.9f, false).italicised()); g.drawText ("By Made ORYMY", R (790, 62, 380, 40), Justification::centredRight);
-    g.setColour (ink.withAlpha (0.7f)); g.setFont (F (R (0, 0, 0, 12).getHeight())); g.drawText ("THE SWEET SPACE OF BACHATA", R (790, 100, 380, 20), Justification::centredRight);
-    g.setColour (Colour (0xffe6c777)); g.setFont (F (R (0, 0, 0, 14).getHeight(), true)); g.drawText ("YMYVerb", R (14, 8, 120, 24), Justification::centredLeft);
-    g.setColour (ink); g.setFont (F (R (0, 0, 0, 12).getHeight())); g.drawText ("IN", R (462, 150, 40, 14), Justification::centred); g.drawText ("OUT", R (698, 150, 40, 14), Justification::centred);
-    g.setColour (gold2); g.setFont (Serif (R (0, 0, 0, 20).getHeight())); g.drawText ("YMY", R (540, 566, 120, 28), Justification::centred);
+    g.setColour (ink.withAlpha (0.7f)); g.setFont (F (static_cast<float> (R (0, 0, 0, 12).getHeight()))); g.drawText ("THE SWEET SPACE OF BACHATA", R (790, 100, 380, 20), Justification::centredRight);
+    g.setColour (Colour (0xffe6c777)); g.setFont (F (static_cast<float> (R (0, 0, 0, 14).getHeight()), true)); g.drawText ("YMYVerb", R (14, 8, 120, 24), Justification::centredLeft);
+    g.setColour (ink); g.setFont (F (static_cast<float> (R (0, 0, 0, 12).getHeight()))); g.drawText ("IN", R (462, 150, 40, 14), Justification::centred); g.drawText ("OUT", R (698, 150, 40, 14), Justification::centred);
+    g.setColour (gold2); g.setFont (Serif (static_cast<float> (R (0, 0, 0, 20).getHeight()))); g.drawText ("YMY", R (540, 566, 120, 28), Justification::centred);
 }
 
 void YmyEditor::resized()
@@ -316,20 +316,20 @@ void YmyEditor::resized()
     duck.setBounds (R (775, 532, 70, 50)); makeup.setBounds (R (850, 532, 76, 50));
     layoutRow ({ kThr, kDepth }, R (948, 445, 224, 70)); layoutRow ({ kAtt, kRel }, R (948, 518, 224, 70));
     // tempo
-    hostCap.setBounds (R (35, 636, 90, 16)); hostBpmLabel.setBounds (R (35, 654, 100, 30)); hostBpmLabel.setFont (F (R (0, 0, 0, 20).getHeight(), true));
+    hostCap.setBounds (R (35, 636, 90, 16)); hostBpmLabel.setBounds (R (35, 654, 100, 30)); hostBpmLabel.setFont (F (static_cast<float> (R (0, 0, 0, 20).getHeight()), true));
     bpmCap.setBounds (R (160, 636, 90, 16)); manualBpm.setBounds (R (160, 654, 100, 30));
     sync.setBounds (R (290, 640, 100, 44));
     division.setBounds (R (35, 706, 120, 28)); triplet.setBounds (R (170, 696, 70, 46)); dotted.setBounds (R (245, 696, 70, 46));
-    preLabel.setBounds (R (35, 750, 360, 28)); preLabel.setFont (F (R (0, 0, 0, 14).getHeight(), true));
+    preLabel.setBounds (R (35, 750, 360, 28)); preLabel.setFont (F (static_cast<float> (R (0, 0, 0, 14).getHeight()), true));
     // presets
     catList.setBounds (R (437, 640, 105, 140)); presetList.setBounds (R (546, 640, 190, 140)); descLabel.setBounds (R (742, 640, 190, 140));
-    descLabel.setFont (F (R (0, 0, 0, 12).getHeight()));
+    descLabel.setFont (F (static_cast<float> (R (0, 0, 0, 12).getHeight())));
     // header
     prev.setBounds (R (300, 6, 28, 28)); presetBox.setBounds (R (332, 6, 300, 28)); next.setBounds (R (636, 6, 28, 28));
     saveB.setBounds (R (672, 6, 70, 28)); saveAsB.setBounds (R (746, 6, 76, 28)); favB.setBounds (R (826, 6, 46, 28));
     abB.setBounds (R (876, 6, 96, 28)); undoB.setBounds (R (976, 6, 56, 28)); redoB.setBounds (R (1036, 6, 56, 28)); modeBox.setBounds (R (1100, 6, 90, 28));
     // mode
-    led.setBounds (R (1070, 680, 80, 50)); warnLabel.setBounds (R (958, 735, 214, 48)); warnLabel.setFont (F (R (0, 0, 0, 11).getHeight()));
+    led.setBounds (R (1070, 680, 80, 50)); warnLabel.setBounds (R (958, 735, 214, 48)); warnLabel.setFont (F (static_cast<float> (R (0, 0, 0, 11).getHeight())));
     meterIn.setBounds (R (468, 170, 26, 240)); meterOut.setBounds (R (706, 170, 26, 240));
     mic.setBounds (R (500, 44, 200, 546));
 }

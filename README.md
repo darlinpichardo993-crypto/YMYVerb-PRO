@@ -1,26 +1,28 @@
 # YMYVerb — Vocal Reverb (YMY Records · Made ORYMY)
 *The Sweet Space of Bachata.* Reverb vocal VST3 para FL Studio, pensado solo para el espacio vocal de la bachata: predelay sincronizado al tempo, colas cálidas y presets por estilo.
 
-## Estado real de esta entrega (léelo primero)
+## Estado verificado de esta entrega
 | Pieza | Estado |
 |---|---|
-| Motor DSP (FDN 8 líneas, predelay, sync, ducking, tono, estéreo) | Escrito y **probado** con tests automáticos (ver abajo) |
-| 34 presets de fábrica (JSON) | Hechos. Son **puntos de partida por diseño, no calibrados de oído** |
-| Plugin JUCE (parámetros, procesador, interfaz, micrófono reactivo) | Escrito. **NO compilado todavía**: el entorno donde se escribió no tiene JUCE ni Windows |
-| YMYVerb.vst3 / YMYVerb_Setup.exe | **No existen aún.** Se generan compilando en Windows (más abajo) |
-| Prueba dentro de FL Studio | **Pendiente** |
+| Motor DSP (FDN de 8 líneas, predelay, sync, ducking, tono y estéreo) | **Compilado y probado** mediante tests automatizados |
+| 34 presets de fábrica (JSON) | Validados: nombres únicos, parámetros reconocidos y valores dentro de rango. Son **puntos de partida por diseño, no calibrados de oído** |
+| Plugin JUCE (procesador e interfaz) | **Compilado correctamente en Windows x64** con JUCE 8.0.4 |
+| `YMYVerb.vst3` y `YMYVerb_Setup.exe` | **Generados y verificados** en GitHub Actions |
+| Pruebas automatizadas Windows | **Aprobadas**: CTest 1/1, con la suite DSP completa |
+| Prueba real dentro de FL Studio | **Pendiente**; no debe considerarse validado en un DAW hasta probarlo allí |
 
-Puede haber errores de compilación en la capa JUCE (GUI/procesador). Si salen, mándame el mensaje exacto y lo corrijo.
+**Descarga del último artefacto compilado:** [YMYVerb-PRO-Windows-x64](https://github.com/darlinpichardo993-crypto/YMYVerb-PRO/actions/runs/40669721340/artifacts/12808320068). Contiene el bundle VST3 y el instalador. La compilación confirma que el código se construye y empaqueta; no sustituye una prueba de audio real en FL Studio.
 
 ## Cómo obtener el .vst3 y el Setup.exe
-### Opción A (la más fácil, sin instalar nada): GitHub Actions
-1. Crea un repositorio en GitHub y sube todo el contenido de esta carpeta.
-2. Pestaña **Actions** → "Build YMYVerb (Windows)" (se ejecuta solo al subir; o "Run workflow").
-3. Al terminar, descarga el artefacto **YMYVerb-windows**: contiene `YMYVerb_Setup.exe` y `YMYVerb.vst3`.
-Esto compila en Release x64, corre los tests DSP y arma el instalador con Inno Setup.
+### Opción A: descargar el paquete ya compilado
+1. Abre [la compilación exitosa en GitHub Actions](https://github.com/darlinpichardo993-crypto/YMYVerb-PRO/actions/runs/40669721340).
+2. En **Artifacts**, descarga `YMYVerb-PRO-Windows-x64`.
+3. Extrae el ZIP: incluye `YMYVerb_Setup.exe` y la carpeta `YMYVerb.vst3`.
+
+Los pushes y pull requests ejecutan automáticamente la compilación Windows x64, los tests DSP y el empaquetado con Inno Setup.
 
 ### Opción B: en tu PC
-Instala Visual Studio 2022 (carga de trabajo C++), CMake e Inno Setup 6, y ejecuta `scripts\build_windows.bat`. Resultado: `dist\YMYVerb_Setup.exe`. Necesita Internet una vez para bajar JUCE 8.0.4.
+Instala Visual Studio con la carga de trabajo **Desktop development with C++**, CMake e Inno Setup 6, y ejecuta `scripts\build_windows.bat`. El script detecta una versión compatible de Visual Studio y genera `dist\YMYVerb_Setup.exe` junto a `dist\YMYVerb.vst3`. Requiere Internet para descargar JUCE 8.0.4.
 
 El instalador pone el plugin en `C:\Program Files\Common Files\VST3\YMYVerb.vst3` (requiere administrador por esa carpeta). Luego en FL Studio: Options → Manage plugins → Find plugins.
 
@@ -35,12 +37,13 @@ El instalador pone el plugin en `C:\Program Files\Common Files\VST3\YMYVerb.vst3
 ## Presets (inspirados, NO réplicas)
 Romeo Santos · Raulin Rodriguez · Joe Veras (4 cada uno) · Bachata 90s · 2000s · Modern Bachata (largas, 4 cada una) · Aux / Send (10 extra: incluye *Infinite Atmosphere*, decay 14 s). Los nombres de artistas indican el carácter buscado (predelay, calidez, densidad, cola); **no** son sus ajustes reales ni hay vínculo con ellos.
 
-## Pruebas DSP ejecutadas (g++ 13, Linux, `Tests/test_dsp.cpp`)
-Silencio→silencio; RT60 medido vs. pedido (Plate/Hall/Hybrid a 1, 2.8 y 6 s: sale ~10 % más corto que lo pedido, ej. 6 s → 5.3-5.5 s); estabilidad 20 s con ruido fuerte y todos los controles al máximo en los 6 algoritmos (sin crecimiento; el limitador interno de seguridad actúa en ese extremo); 5 sample rates (44.1-192 kHz) × 7 tamaños de buffer; predelay (sin fuga antes del tiempo fijado); ducking (-18 dB con voz, cola recuperada en pausas); sync (125 ms, 83.3 ms, 187.5 ms, plegado a 250 ms).
-**No probado:** audio con voces reales, escucha de los presets, CPU en Ryzen 7, GUI, FL Studio, guardado/restauración de proyecto, Undo/Redo, validador VST3.
+## Pruebas DSP y límites de validación
+La suite `Tests/test_dsp.cpp` se compila y ejecuta en GitHub Actions para Windows x64; la ejecución más reciente terminó con **CTest 1/1 aprobado**. Incluye comprobaciones de silencio, tiempo de decaimiento RT60, estabilidad con ajustes extremos, cinco frecuencias de muestreo (44.1–192 kHz), siete tamaños de bloque, predelay, ducking y sincronización de tempo.
+
+**Aún no probado en esta entrega:** escucha de voces reales y ajuste auditivo de presets, consumo de CPU en un Ryzen 7, interacción visual manual, carga dentro de FL Studio, guardado/restauración real de proyectos y validación mediante el VST3 Validator.
 
 ## Estructura
-`Source/DSP` (motor y sync, sin JUCE) · `Source/PluginProcessor.*` · `Source/PluginEditor.*` · `Source/Presets/factory_presets.json` (generado con `scripts/gen_presets.py`) · `Tests` · `Installer/YMYVerb.iss` · `.github/workflows/build.yml` · `Resources/Interfaz_referencia.png`.
+`Source/DSP` (motor y sync, sin JUCE) · `Source/PluginProcessor.*` · `Source/PluginEditor.*` · `Source/Presets/factory_presets.json` (generado con `scripts/gen_presets.py`) · `Tests` · `Installer/YMYVerb.iss` · `.github/workflows/build-windows.yml` · `scripts/build_windows.ps1` · `Resources/Interfaz_referencia.png`.
 
 ## Diferencias con la imagen de referencia / limitaciones conocidas
 * La GUI se dibuja por código (gradientes y vectores), parecida a la referencia pero no idéntica pixel a pixel; no usa la imagen como fondo.

@@ -11,7 +11,7 @@ AudioProcessorValueTreeState::ParameterLayout YmyProcessor::createLayout()
     {
         v.push_back (std::make_unique<AudioParameterFloat> (ParameterID { id, 1 }, name, NormalisableRange<float> (0.f, 1.f, 0.001f), def,
             AudioParameterFloatAttributes().withStringFromValueFunction ([] (float x, int) { return String (roundToInt (x * 100.f)) + "%"; })
-                                           .withValueFromTextFunction ([] (const String& s) { return s.getFloatValue() / 100.f; })));
+                                           .withValueFromStringFunction ([] (const String& s) { return s.getFloatValue() / 100.f; })));
     };
     auto flt = [&] (const char* id, const char* name, NormalisableRange<float> r, float def, String suffix, int dec)
     {

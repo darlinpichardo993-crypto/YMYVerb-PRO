@@ -50,8 +50,9 @@ void SimpleList::paintListBoxItem (int row, Graphics& g, int w, int h, bool sel)
 {
     if (sel) { g.setColour (Colour (0xff2c5da8)); g.fillRect (0, 0, w, h); }
     g.setColour (sel ? Colours::white : Colour (0xffd9deea)); g.setFont (F (12.f));
-    g.drawText (text (row), 8, 0, w - 24, h, Justification::centredLeft);
-    if (starred && starred (row)) { g.setColour (Colour (0xfff2c14e)); g.drawText (juce::String::fromUTF8 ("\xe2\x98\x85"), w - 20, 0, 16, h, Justification::centred); }
+    const auto itemText = text ? text (row) : juce::String();
+    g.drawText (itemText, 8, 0, w - 24, h, Justification::centredLeft);
+    if (starred && starred (row)) { g.setColour (Colour (0xfff2c14e)); g.drawText (juce::String::fromUTF8 ("\\xe2\\x98\\x85"), w - 20, 0, 16, h, Justification::centred); }
 }
 
 // ------------------------------------------------------------------ knob / meter / mic
@@ -186,12 +187,26 @@ YmyEditor::YmyEditor (YmyProcessor& p) : AudioProcessorEditor (&p), proc (p), ca
     for (auto* l : { &catList, &presetList }) { l->setColour (ListBox::backgroundColourId, Colour (0xff0e1730)); l->setRowHeight (20); }
 
     catModel.count = [this] { return cats.size(); };
-    catModel.text = [this] (int i) { return cats[i]; };
-    catModel.select = [this] (int i) { if (updatingUI) return; catSel = i; refreshPresetUI (true); };
+    catModel.text = [this] (int i) { return (i >= 0 && i < cats.size()) ? cats[i] : String(); };
+    catModel.select = [this] (int i) { if (updatingUI || i < 0 || i >= cats.size()) return; catSel = i; refreshPresetUI (true); };
     listModel.count = [this] { return (int) shownIdx.size(); };
-    listModel.text = [this] (int i) { return proc.getPresets()[(size_t) shownIdx[(size_t) i]].name; };
-    listModel.starred = [this] (int i) { return proc.isFavorite (shownIdx[(size_t) i]); };
-    listModel.select = [this] (int i) { if (updatingUI) return; proc.loadPreset (shownIdx[(size_t) i]); refreshPresetUI (false); };
+    listModel.text = [this] (int i)
+    {
+        if (i < 0 || i >= (int) shownIdx.size()) return String();
+        const int presetIndex = shownIdx[(size_t) i];
+        const auto& allPresets = proc.getPresets();
+        return (presetIndex >= 0 && presetIndex < (int) allPresets.size()) ? allPresets[(size_t) presetIndex].name : String();
+    };
+    listModel.starred = [this] (int i)
+    {
+        return i >= 0 && i < (int) shownIdx.size() && proc.isFavorite (shownIdx[(size_t) i]);
+    };
+    listModel.select = [this] (int i)
+    {
+        if (updatingUI || i < 0 || i >= (int) shownIdx.size()) return;
+        proc.loadPreset (shownIdx[(size_t) i]);
+        refreshPresetUI (false);
+    };
 
     presetBox.onChange = [this] { const int id = presetBox.getSelectedId(); if (id > 0 && id - 1 != proc.getCurrentPreset()) { proc.loadPreset (id - 1); refreshPresetUI (false); } };
     auto step = [this] (int d) { const int n = (int) proc.getPresets().size(); proc.loadPreset ((proc.getCurrentPreset() + d + n) % n); refreshPresetUI (false); };

@@ -68,7 +68,7 @@ try {
     New-Item -ItemType Directory -Force -Path $dist | Out-Null
 
     Invoke-Checked "cmake" @("-S", $root, "-B", $build, "-G", $generator, "-A", "x64")
-    Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--target", "YMYVerb_VST3", "test_dsp", "--parallel", "2")
+    Invoke-Checked "cmake" @("--build", $build, "--config", "Release", "--target", "YMYVerb_VST3", "YMYVerb_Standalone", "test_dsp", "--parallel", "2")
     Invoke-Checked "ctest" @("--test-dir", $build, "-C", "Release", "--output-on-failure")
 
     $bundleCandidates = @(
@@ -90,11 +90,26 @@ try {
         throw "El bundle existe, pero no contiene un binario .vst3."
     }
 
+    $standaloneCandidates = @(
+        (Join-Path $build 'YMYVerb_artefacts\Release\Standalone\YMYVerb.exe'),
+        (Join-Path $build 'YMYVerb_artefacts\RelWithDebInfo\Standalone\YMYVerb.exe')
+    )
+    $standaloneExe = $standaloneCandidates | Where-Object { Test-Path $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $standaloneExe) {
+        $standaloneExe = Get-ChildItem -Path $build -Recurse -File -Filter 'YMYVerb.exe' -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\Standalone\\' } |
+            Select-Object -ExpandProperty FullName -First 1
+    }
+    if (-not $standaloneExe) {
+        throw "La compilación no generó YMYVerb.exe (Standalone)."
+    }
+
     $stagedBundle = Join-Path $dist 'YMYVerb.vst3'
     if (Test-Path $stagedBundle) { Remove-Item -Recurse -Force $stagedBundle }
     Copy-Item -Path $vst3Bundle -Destination $stagedBundle -Recurse -Force
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $dist 'YMYVerb.exe') -Force
 
-    Invoke-Checked $iscc @("/DVST3Dir=$vst3Bundle", (Join-Path $root 'Installer\YMYVerb.iss'))
+    Invoke-Checked $iscc @("/DVST3Dir=$vst3Bundle", "/DStandaloneExe=$standaloneExe", (Join-Path $root 'Installer\YMYVerb.iss'))
 
     $installer = Join-Path $dist 'YMYVerb_Setup.exe'
     if (-not (Test-Path $installer -PathType Leaf)) {
@@ -106,7 +121,7 @@ try {
 
     Write-Host ""
     Write-Host "COMPILACIÓN COMPLETADA" -ForegroundColor Green
-    Get-Item $vst3Binary, (Join-Path $dist 'YMYVerb.vst3'), $installer |
+    Get-Item $vst3Binary, $standaloneExe, (Join-Path $dist 'YMYVerb.vst3'), (Join-Path $dist 'YMYVerb.exe'), $installer |
         Select-Object FullName, Length |
         Format-Table -AutoSize
 }

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: VST3 + DSP tests + Setup.exe (x64)
+    name: VST3 + Standalone + pluginval + DSP tests + Setup.exe (x64)
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -30,12 +30,30 @@ jobs:
         shell: pwsh
         run: ./scripts/build_windows.ps1 -NoPause
 
-      - name: Verify VST3 and installer
+      - name: Validate VST3 with pluginval
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP "pluginval_Windows.zip"
+          $validatorDir = Join-Path $env:RUNNER_TEMP "pluginval"
+          $validationLogs = Join-Path $env:GITHUB_WORKSPACE "dist\\pluginval-logs"
+          Invoke-WebRequest -Uri "https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip" -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $validatorDir -Force
+          $validator = Get-ChildItem -Path $validatorDir -Recurse -File -Filter "pluginval.exe" | Select-Object -First 1
+          if (-not $validator) { throw "Could not find pluginval.exe after extraction." }
+          New-Item -ItemType Directory -Force -Path $validationLogs | Out-Null
+          $plugin = Join-Path $env:GITHUB_WORKSPACE "dist\\YMYVerb.vst3"
+          & $validator.FullName --strictness-level 5 --output-dir $validationLogs $plugin
+          if ($LASTEXITCODE -ne 0) {
+            throw "pluginval failed to load or validate YMYVerb. See pluginval logs in the job artifacts."
+          }
+
+      - name: Verify VST3, standalone app, and installer
         shell: pwsh
         run: |
           $dist = Join-Path $env:GITHUB_WORKSPACE "dist"
           $plugin = Join-Path $dist "YMYVerb.vst3"
           $installer = Join-Path $dist "YMYVerb_Setup.exe"
+          $standalone = Join-Path $dist "YMYVerb.exe"
 
           if (-not (Test-Path $plugin -PathType Container)) {
             throw "The staged VST3 bundle is missing."
@@ -45,6 +63,12 @@ jobs:
           if (-not $binary) {
             throw "The staged bundle does not contain a VST3 binary."
           }
+          if (-not (Test-Path $standalone -PathType Leaf)) {
+            throw "The standalone desktop application is missing."
+          }
+          if ((Get-Item $standalone).Length -lt 100000) {
+            throw "The standalone executable is suspiciously small."
+          }
           if (-not (Test-Path $installer -PathType Leaf)) {
             throw "The installer executable is missing."
           }
@@ -52,6 +76,7 @@ jobs:
             throw "The installer executable is suspiciously small."
           }
           Write-Host "VST3 binary: $($binary.FullName) ($($binary.Length) bytes)"
+          Write-Host "Standalone: $standalone ($((Get-Item $standalone).Length) bytes)"
           Write-Host "Installer: $installer ($((Get-Item $installer).Length) bytes)"
 
       - name: Upload release artifacts
@@ -60,6 +85,8 @@ jobs:
           name: YMYVerb-PRO-Windows-x64
           path: |
             dist/YMYVerb.vst3/**
+            dist/YMYVerb.exe
             dist/YMYVerb_Setup.exe
+            dist/pluginval-logs/**
           if-no-files-found: error
           retention-days: 30

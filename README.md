@@ -6,18 +6,19 @@
 |---|---|
 | Motor DSP (FDN de 8 líneas, predelay, sync, ducking, tono y estéreo) | **Compilado y probado** mediante tests automatizados |
 | 34 presets de fábrica (JSON) | Validados: nombres únicos, parámetros reconocidos y valores dentro de rango. Son **puntos de partida por diseño, no calibrados de oído** |
-| Plugin JUCE (procesador e interfaz) | **Compilado correctamente en Windows x64** con JUCE 8.0.4 |
-| `YMYVerb.vst3` y `YMYVerb_Setup.exe` | **Generados y verificados** en GitHub Actions |
-| Pruebas automatizadas Windows | **Aprobadas**: CTest 1/1, con la suite DSP completa |
-| Prueba real dentro de FL Studio | **Pendiente**; no debe considerarse validado en un DAW hasta probarlo allí |
+| Plugin JUCE VST3 | Se compila y se valida con pluginval en Windows x64 |
+| Aplicación de escritorio `YMYVerb.exe` | Incluida como formato Standalone |
+| `YMYVerb.vst3` y `YMYVerb_Setup.exe` | Generados con comprobación automática |
+| Pruebas DSP en Windows | CTest 1/1; además se valida la carga y los parámetros con pluginval |
+| Prueba manual en FL Studio | Sigue siendo necesaria para confirmar audio dentro del DAW |
 
-**Descarga del último artefacto compilado:** [YMYVerb-PRO-Windows-x64](https://github.com/darlinpichardo993-crypto/YMYVerb-PRO/actions/runs/40669721340/artifacts/12808320068). Contiene el bundle VST3 y el instalador. La compilación confirma que el código se construye y empaqueta; no sustituye una prueba de audio real en FL Studio.
+Cada compilación aprobada publica un ZIP en **Artifacts** que contiene `YMYVerb.vst3`, `YMYVerb.exe` (aplicación de escritorio), `YMYVerb_Setup.exe` y los logs de pluginval. Una compilación normal no se considera exitosa si pluginval no puede cargar y validar el plugin.
 
 ## Cómo obtener el .vst3 y el Setup.exe
 ### Opción A: descargar el paquete ya compilado
 1. Abre [la compilación exitosa en GitHub Actions](https://github.com/darlinpichardo993-crypto/YMYVerb-PRO/actions/runs/40669721340).
 2. En **Artifacts**, descarga `YMYVerb-PRO-Windows-x64`.
-3. Extrae el ZIP: incluye `YMYVerb_Setup.exe` y la carpeta `YMYVerb.vst3`.
+3. Extrae el ZIP: incluye `YMYVerb_Setup.exe`, `YMYVerb.exe` (Standalone) y la carpeta `YMYVerb.vst3`.
 
 Los pushes y pull requests ejecutan automáticamente la compilación Windows x64, los tests DSP y el empaquetado con Inno Setup.
 

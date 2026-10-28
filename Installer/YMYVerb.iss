@@ -1,8 +1,11 @@
-; Inno Setup script. Build:  iscc /DVST3Dir="C:\path\to\YMYVerb.vst3" Installer\YMYVerb.iss
+; Inno Setup script for YMYVerb VST3 effect and standalone desktop app.
 #define MyAppName "YMYVerb"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #ifndef VST3Dir
   #define VST3Dir "..\build\YMYVerb_artefacts\Release\VST3\YMYVerb.vst3"
+#endif
+#ifndef StandaloneExe
+  #define StandaloneExe "..\build\YMYVerb_artefacts\Release\Standalone\YMYVerb.exe"
 #endif
 
 [Setup]
@@ -28,12 +31,19 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "docs"; Description: "Instalar la documentacion (README)"; Flags: checkedonce
+Name: "docs"; Description: "Instalar la documentación (README)"; Flags: checkedonce
+Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; GroupDescription: "Accesos directos:"; Flags: unchecked
 
 [Files]
-; The VST3 goes to the standard 64-bit VST3 folder (Program Files\Common Files\VST3).
+; Install plugin into the standard system-wide VST3 folder.
 Source: "{#VST3Dir}\*"; DestDir: "{commoncf64}\VST3\YMYVerb.vst3"; Flags: recursesubdirs createallsubdirs ignoreversion
+; Standalone app is installed alongside the documentation.
+Source: "{#StandaloneExe}"; DestDir: "{app}"; DestName: "YMYVerb.exe"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion; Tasks: docs
+
+[Icons]
+Name: "{autoprograms}\YMY Records\YMYVerb"; Filename: "{app}\YMYVerb.exe"; WorkingDir: "{app}"
+Name: "{autodesktop}\YMYVerb"; Filename: "{app}\YMYVerb.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Code]
 function InitializeSetup(): Boolean;
